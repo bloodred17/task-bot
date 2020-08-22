@@ -5,10 +5,13 @@ module.exports = {
     const startFilter = message.content.split('\`\`\`javascript');
     const endFilter = startFilter[1].split('\`\`\`');
     const userCode = endFilter[0];
-    var log = [];
-    eval(userCode);
-    console.log('Hello');
-    console.log(log);
+    var capcon = require('capture-console');
+    var stdio = capcon.captureStdio(function scope() {
+      eval(userCode);
+    });
+    console.log(stdio);
+    const regex = /true/g;
+    console.log(stdio.stdout.search(regex));
 		if (!args.length) {
 			return message.channel.send(`You didn't provide any arguments, ${message.author}!`);
 		} else if (args[0] === 'beginner') {
