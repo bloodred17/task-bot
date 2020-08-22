@@ -1,4 +1,5 @@
 // Require discord.js package
+require('dotenv').config();
 const Discord = require("discord.js");
 
 // Create a new client using the new keyword
@@ -18,4 +19,4 @@ client.on("message", msg =>{
 });
 
 // Log in the bot with the token
-client.login("NzQ2NDcwNTgzODY4NDU3MDMy.X0Ay5w.6vcyLcUhaAHQ3HS-fZ1YFl7lfs8");
+client.login(process.env.TOKEN);
