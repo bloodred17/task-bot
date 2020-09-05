@@ -69,7 +69,8 @@ export default class CompileCommand extends CompilerCommand {
                 return;
             }
             // const stdinblock = parser.getStdinBlockFromText();
-            const stdinblock = 'this is input 1\nthis is input 2\nthis is input 3\nthis is input 4';
+            // const stdinblock = 'this is input 1\nthis is input 2\nthis is input 3\nthis is input 4';
+            const stdinblock = this.validator.getValidStdin('beginner');
             if (stdinblock) {
                 argsData.stdin = stdinblock;
                 console.log(argsData);
@@ -138,6 +139,7 @@ export default class CompileCommand extends CompilerCommand {
      * @param {*} json 
      */
     static buildResponseEmbed(msg, json) {
+        const validator = new Validator();
         const embed = new MessageEmbed()
         .setTitle('Compilation Results:')
         .setFooter("Requested by: " + msg.message.author.tag)
@@ -186,7 +188,7 @@ export default class CompileCommand extends CompilerCommand {
 
             //Validation goes here
             let test = false;
-            if (json.program_message === 'Hello World') {
+            if (json.program_message === validator.getValidStdout('beginner')) {
                 test = true;
             }
 
@@ -226,8 +228,8 @@ class Validator {
                     output: 'hello world 1',
                 },
                 {
-                    input: 'hello world 1',
-                    output: 'hello world 1',
+                    input: 'hello world 2',
+                    output: 'hello world 2',
                 }
             ],
             intermediate: [],
@@ -236,11 +238,15 @@ class Validator {
     }
 
     getValidStdin(level) {
-        this.validationData[level].reduce((acc, out, idx, arr) => {
+        return this.validationData[level].reduce((acc, out, idx, arr) => {
             if (idx === arr.length - 1) {
               return acc + out.input
             }
             return acc + out.input + '\n'
         }, '');
+    }
+    
+    getValidStdout(level) {
+        return this.validationData[level].reduce((acc, out) => acc + out.output + '\n', '');
     }
 }
