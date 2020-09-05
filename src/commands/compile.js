@@ -5,8 +5,8 @@ import CompilerCommand from './utils/CompilerCommand';
 import CompilerCommandMessage from './utils/CompilerCommandMessage'
 import CompilerClient from '../CompilerClient'
 import { WandboxSetup } from '../utils/apis/Wandbox';
-import SupportServer from './../SupportServer'
-import CompilationParser from './utils/CompilationParser'
+import SupportServer from './../SupportServer';
+import CompilationParser from './utils/CompilationParser';
 
 export default class CompileCommand extends CompilerCommand {
     /**
@@ -20,6 +20,8 @@ export default class CompileCommand extends CompilerCommand {
             description: 'Compiles a script \nNote: This command\'s code input MUST be encapsulated in codeblocks',
             developerOnly: false
         });
+        this.validator = new Validator();
+        console.log(this.validator);
     }
 
     /**
@@ -66,9 +68,11 @@ export default class CompileCommand extends CompilerCommand {
                 msg.replyFail('You must attach codeblocks containing code to your message');
                 return;
             }
-            const stdinblock = parser.getStdinBlockFromText();
+            // const stdinblock = parser.getStdinBlockFromText();
+            const stdinblock = 'this is input 1\nthis is input 2\nthis is input 3\nthis is input 4';
             if (stdinblock) {
                 argsData.stdin = stdinblock;
+                console.log(argsData);
             }
         }
 
@@ -119,7 +123,7 @@ export default class CompileCommand extends CompilerCommand {
             this.client.stats.compilationExecuted(lang, embed.color == 0xFF0000);
 
         try {
-            responsemsg.react((embed.color == 0xFF0000)?'❌':'✅');
+            responsemsg.react((embed.color == 0xFF0000)?'❌':'☝');
         }
         catch (error) {
             msg.replyFail(`Unable to react to message, am I missing permissions?\n${error}`);
@@ -136,9 +140,8 @@ export default class CompileCommand extends CompilerCommand {
     static buildResponseEmbed(msg, json) {
         const embed = new MessageEmbed()
         .setTitle('Compilation Results:')
-        .setFooter("Requested by: " + msg.message.author.tag + " || Powered by wandbox.org")
+        .setFooter("Requested by: " + msg.message.author.tag)
         .setColor(0x00FF00);
-
         if (json.status) {
             if (json.status != 0) {
                 embed.setColor((0xFF0000));
@@ -151,10 +154,6 @@ export default class CompileCommand extends CompilerCommand {
 
         if (json.signal) {
             embed.addField('Signal', `\`\`\`${json.signal}\`\`\``);
-        }
-
-        if (json.url) {
-            embed.addField('URL', `Link: ${json.url}`);
         }
 
         if (json.compiler_message) {
@@ -185,8 +184,15 @@ export default class CompileCommand extends CompilerCommand {
 
             json.program_message = stripAnsi(json.program_message);
 
-            embed.addField('Program Output', `\`\`\`\n${json.program_message}\n\`\`\``);
+            //Validation goes here
+            let test = false;
+            if (json.program_message === 'Hello World') {
+                test = true;
+            }
+
+            embed.addField('Program Output', `\`\`\`\n${json.program_message}\n\`\`\`\n Valid: ${(!test)?'❌':'✅'}`);
         }
+
         return embed;
     }
 
@@ -209,4 +215,32 @@ export default class CompileCommand extends CompilerCommand {
         return await message.dispatch('', embed);
     }
 
+}
+
+class Validator {
+    constructor() {
+        this.validationData = {
+            beginner: [
+                {
+                    input: 'hello world 1',
+                    output: 'hello world 1',
+                },
+                {
+                    input: 'hello world 1',
+                    output: 'hello world 1',
+                }
+            ],
+            intermediate: [],
+            advanced: []
+        }   
+    }
+
+    getValidStdin(level) {
+        this.validationData[level].reduce((acc, out, idx, arr) => {
+            if (idx === arr.length - 1) {
+              return acc + out.input
+            }
+            return acc + out.input + '\n'
+        }, '');
+    }
 }
