@@ -32,6 +32,7 @@
     "@babel/preset-env": "^7.10.3",
     "@babel/register": "^7.10.3",
     "@babel/runtime": "^7.10.3",
+    "axios": "^0.20.0",
     "bufferutil": "^4.0.1",
     "dblapi.js": "^2.4.0",
     "discord.js": "^12.2.0",

@@ -7,6 +7,7 @@ import CompilerClient from '../CompilerClient'
 import { WandboxSetup } from '../utils/apis/Wandbox';
 import SupportServer from './../SupportServer';
 import CompilationParser from './utils/CompilationParser';
+import * as axios from 'axios';
 
 let level;
 export default class CompileCommand extends CompilerCommand {
@@ -22,7 +23,6 @@ export default class CompileCommand extends CompilerCommand {
             developerOnly: false
         });
         this.validator = new Validator();
-        console.log(this.validator);
     }
 
     /**
@@ -75,7 +75,6 @@ export default class CompileCommand extends CompilerCommand {
             const stdinblock = this.validator.getValidStdin(level);
             if (stdinblock) {
                 argsData.stdin = stdinblock;
-                console.log(argsData);
             }
         }
 
@@ -223,38 +222,22 @@ export default class CompileCommand extends CompilerCommand {
 
 class Validator {
     constructor() {
-        // this.validationData = {
-        //     "beginner": [
-        //         {
-        //             "input": "hello world 1",
-        //             "output": "hello world 1"
-        //         },
-        //         {
-        //             "input": "hello world 2",
-        //             "output": "hello world 2"
-        //         }
-        //     ],
-        //     "intermediate": [
-        //         {
-        //             "input": "hello world 1",
-        //             "output": "hello world 1"
-        //         },
-        //         {
-        //             "input": "hello world 2",
-        //             "output": "hello world 2"
-        //         }
-        //     ],
-        //     "advanced": [
-        //         {
-        //             "input": "hello world 1",
-        //             "output": "hello world 1"
-        //         },
-        //         {
-        //             "input": "hello world 2",
-        //             "output": "hello world 2"
-        //         }
-        //     ]
-        // } 
+        this.validationData = {};
+        axios.get('https://alpha-test-bot.firebaseio.com/key.json')
+        .then(response => {
+            let key = Object.values(response.data).reduce((acc, item) => acc + item, '');
+            axios.get('https://alpha-test-bot.firebaseio.com/valid.json')
+            .then(response => {
+                this.validationData = Object.values(response.data).filter((item) => {
+                    if (item.key === key) {
+                        return item;
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.log(error);
+        });
     }
 
     getValidStdin(level) {
