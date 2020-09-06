@@ -8,6 +8,7 @@ import { WandboxSetup } from '../utils/apis/Wandbox';
 import SupportServer from './../SupportServer';
 import CompilationParser from './utils/CompilationParser';
 
+let level;
 export default class CompileCommand extends CompilerCommand {
     /**
      *  Creates the compile command
@@ -36,11 +37,13 @@ export default class CompileCommand extends CompilerCommand {
 			return await this.help(msg);
 		}
 		
-        let lang = args[0].toLowerCase();
+        level = args[0].toLowerCase();
+        let lang = args[1].toLowerCase();
+
         args.shift();
 
         if (!this.client.wandbox.isValidCompiler(lang) && !this.client.wandbox.has(lang)) {
-            msg.replyFail(`You must input a valid language or compiler \n\n Usage: ${this.client.prefix}compile <language/compiler> \`\`\`<code>\`\`\``);
+            msg.replyFail(`You must input a valid level, language or compiler \n\n Usage: ${this.client.prefix}compile <level> <language/compiler> \`\`\`<code>\`\`\``);
             return;
         }
 
@@ -69,8 +72,7 @@ export default class CompileCommand extends CompilerCommand {
                 return;
             }
             // const stdinblock = parser.getStdinBlockFromText();
-            // const stdinblock = 'this is input 1\nthis is input 2\nthis is input 3\nthis is input 4';
-            const stdinblock = this.validator.getValidStdin('beginner');
+            const stdinblock = this.validator.getValidStdin(level);
             if (stdinblock) {
                 argsData.stdin = stdinblock;
                 console.log(argsData);
@@ -188,7 +190,7 @@ export default class CompileCommand extends CompilerCommand {
 
             //Validation goes here
             let test = false;
-            if (json.program_message === validator.getValidStdout('beginner')) {
+            if (json.program_message === validator.getValidStdout(level)) {
                 test = true;
             }
 
@@ -208,10 +210,10 @@ export default class CompileCommand extends CompilerCommand {
             .setTitle('Command Usage')
             .setDescription(`*${this.description}*`)
             .setColor(0x00FF00)
-            .addField('Standard compile', `${this.toString()} <language|compiler> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
-            .addField('Compile w/ options', `${this.toString()} <language|compiler> <options> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
-            .addField('Compile w/ stdin', `${this.toString()} <language|compiler> | <stdin> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
-            .addField('Compile w/ url code', `${this.toString()} <language|compiler> < http://online.file/url`)
+            .addField('Standard compile', `${this.toString()} <level> <language|compiler> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
+            .addField('Compile w/ options', `${this.toString()} <level> <language|compiler> <options> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
+            .addField('Compile w/ stdin', `${this.toString()} <level> <language|compiler> | <stdin> \\\`\\\`\\\`<code>\\\`\\\`\\\``)
+            .addField('Compile w/ url code', `${this.toString()} <level> <language|compiler> < http://online.file/url`)
             .setThumbnail('https://imgur.com/TNzxfMB.png')
             .setFooter(`Requested by: ${message.message.author.tag}`)
         return await message.dispatch('', embed);
@@ -221,20 +223,38 @@ export default class CompileCommand extends CompilerCommand {
 
 class Validator {
     constructor() {
-        this.validationData = {
-            beginner: [
-                {
-                    input: 'hello world 1',
-                    output: 'hello world 1',
-                },
-                {
-                    input: 'hello world 2',
-                    output: 'hello world 2',
-                }
-            ],
-            intermediate: [],
-            advanced: []
-        }   
+        // this.validationData = {
+        //     "beginner": [
+        //         {
+        //             "input": "hello world 1",
+        //             "output": "hello world 1"
+        //         },
+        //         {
+        //             "input": "hello world 2",
+        //             "output": "hello world 2"
+        //         }
+        //     ],
+        //     "intermediate": [
+        //         {
+        //             "input": "hello world 1",
+        //             "output": "hello world 1"
+        //         },
+        //         {
+        //             "input": "hello world 2",
+        //             "output": "hello world 2"
+        //         }
+        //     ],
+        //     "advanced": [
+        //         {
+        //             "input": "hello world 1",
+        //             "output": "hello world 1"
+        //         },
+        //         {
+        //             "input": "hello world 2",
+        //             "output": "hello world 2"
+        //         }
+        //     ]
+        // } 
     }
 
     getValidStdin(level) {
